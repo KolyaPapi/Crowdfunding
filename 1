@@ -1,0 +1,40 @@
+pragma solidity ^0.8.0;
+
+contract Crowdfunding {
+    address public owner;
+    uint256 public goal;
+    uint256 public raisedAmount;
+    mapping(address => uint256) public contributions;
+    bool public campaignClosed;
+
+    event ContributionReceived(address indexed contributor, uint256 amount);
+
+    constructor(uint256 _goal) {
+        owner = msg.sender;
+        goal = _goal;
+        raisedAmount = 0;
+        campaignClosed = false;
+    }
+
+    function contribute() public payable {
+        require(!campaignClosed, "Campaign is closed.");
+        require(raisedAmount < goal, "Campaign goal already reached.");
+
+        contributions[msg.sender] += msg.value;
+        raisedAmount += msg.value;
+
+        emit ContributionReceived(msg.sender, msg.value);
+
+        if (raisedAmount >= goal) {
+            campaignClosed = true;
+        }
+    }
+
+    function withdrawFunds() public {
+        require(msg.sender == owner, "Only the owner can withdraw funds.");
+        require(raisedAmount >= goal, "Campaign goal not reached.");
+
+        // Transfer funds to the owner
+        // ...
+    }
+}
